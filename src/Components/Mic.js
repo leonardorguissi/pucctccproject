@@ -8,9 +8,10 @@ import axios                                      from 'axios';
 
 require ('./styles.scss');
 
-var userStartStop = 0;
-const postURL = 'http://127.0.0.1:5000/hello';
-var interval;
+const postURL = 'http://127.0.0.1:5000/predict';
+let interval = 0;
+let chunks = new Array();
+let chunks_count = 0;
 
 export default class Demo extends Component {
   constructor(props){
@@ -19,7 +20,9 @@ export default class Demo extends Component {
       classification: "Nothing yet...",
       blobObject: null,
       isRecording: false,
-      isPaused: false
+      isPaused: false,
+      segment: 'first',
+      stop: false,
     }
   }
 
@@ -27,54 +30,35 @@ export default class Demo extends Component {
   }
 
   startOrPauseRecording= () => {
-    /*if(userStartStop) {
-      clearInterval(interval);
-      userStartStop = 0;
-    }
-    else {
-      userStartStop = 1;
-    }*/
-    const { isPaused, isRecording } = this.state
-
+    const { isPaused, isRecording} = this.state
+    this.setState({ segment: 'first'});
     if(isPaused) {
-      this.setState({ isPaused: false })
+      this.setState({ isPaused: false });
     } else if(isRecording) {
-      this.setState({ isPaused: true })
+      this.setState({ isPaused: true });
     } else {
-      this.setState({ isRecording: true })
-    }
-    this.setState({classification: "Recording..."})
-
-    /*if(!userStartStop) {
-      return;
+      this.setState({ isRecording: true });
+      this.setState({ stop: false })
     }
 
     setTimeout(() => {
-      document.getElementById('stop').click();
-      document.getElementById('start-pause').click();
-    }, 4000);
-    interval = setInterval(() => {
-      document.getElementById('stop').click();
-      document.getElementById('start-pause').click();
-    },1000);*/
+      this.sendData();
+      interval = setInterval(() => {
+        this.sendData();
+      }, 1200);
+    }, 4160);
   }
 
-  stopRecording= () => {
-    this.setState({ isRecording: false });
-  }
-
-  onSave=(blobObject) => {
-  }
-
-  onStart=() => {
-    console.log('You can tap into the onStart callback');
-  }
-
-  onStop= (blobObject) => {
-    this.setState({ blobURL : blobObject.blobURL });
+  sendData= () => {
+    let blob = new Blob(chunks, { type: 'audio/webm;codecs=opus'});
+    console.log(blob);
+    console.log(chunks);
+    chunks.splice(2, chunks_count-1);
+    chunks_count = 0;
     let formData = new FormData();
-    console.log(blobObject.blob);
-    formData.append('file', blobObject.blob)
+    formData.append('file', blob, 'test.webm');
+    formData.append('segment', this.state.segment);
+    this.setState({ segment: 'next'});
     axios.post(
       postURL,
       formData,
@@ -93,8 +77,26 @@ export default class Demo extends Component {
     });
   }
 
+  stopRecording= () => {
+    this.setState({ isRecording: false });
+  }
+
+  onSave=(blobObject) => {
+  }
+
+  onStart=() => {
+    console.log('You can tap into the onStart callback');
+  }
+
+  onStop= (blobObject) => {
+    this.setState({ blobURL : blobObject.blobURL});
+    clearInterval(interval);
+  }
+
   onData(recordedBlob) {
-    console.log('chunk of real-time data is: ', recordedBlob);
+    //console.log('chunk of real-time data is: ', recordedBlob);
+    chunks.push(recordedBlob);
+    chunks_count++;
   }
 
   render() {
