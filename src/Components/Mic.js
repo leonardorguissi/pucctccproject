@@ -8,10 +8,15 @@ import axios                                      from 'axios';
 
 require ('./styles.scss');
 
-const postURL = 'http://127.0.0.1:5000/predict';
+const postURL = 'http://localhost:5000/predict';
 let interval = 0;
 let chunks = new Array();
 let chunks_count = 0;
+const responses = {
+  'dog_bark': 'Cachorro Latindo',
+  'siren': 'Sirene',
+  'car_horn': 'Buzina',
+};
 
 export default class Demo extends Component {
   constructor(props){
@@ -69,7 +74,9 @@ export default class Demo extends Component {
       }
     )
     .then((response) => {
-      this.setState({ classification: response.data});
+      if (response.data in responses) {
+        this.setState({ classification: responses.response.data});
+      }
       console.log(response);
     })
     .catch((error) => {
@@ -99,14 +106,15 @@ export default class Demo extends Component {
     chunks_count++;
   }
 
+  /*<h2>Sound Classification for Deaf and Hard of Hearing Users</h2>*/
   render() {
     const { blobURL, isRecording, isPaused } = this.state;
 
     return(
       <MuiThemeProvider>
         <div>
-          <h1>What's Around?</h1>
-          <h2>Sound Classification for Deaf and Hard of Hearing Users</h2>
+          <h1>Classificação de sons para pessoas surdas e com deficiência auditiva</h1>
+          <br/>
           <br/>
           <ReactMic
             className="oscilloscope"
@@ -143,17 +151,15 @@ export default class Demo extends Component {
           <br/>
           <br/>
           <h2 class="classification-title">
-            Result:
+            Resposta:
           </h2>
           <h3 class="classification-title">
             {this.state.classification}
           </h3>
           <br/>
           <br/>
-          <br/>
-          <br/>
           <div class="fav-icon-source">
-            Listen icon by <a href="https://icon-icons.com">Icons-Icons</a>
+            Ícone disponível em <a href="https://icon-icons.com">Icons-Icons</a>
           </div>
 
         </div>
