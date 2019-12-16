@@ -12,17 +12,12 @@ const postURL = 'http://localhost:5000/predict';
 let interval = 0;
 let chunks = new Array();
 let chunks_count = 0;
-const responses = {
-  'dog_bark': 'Cachorro Latindo',
-  'siren': 'Sirene',
-  'car_horn': 'Buzina',
-};
 
 export default class Demo extends Component {
   constructor(props){
     super(props);
     this.state = {
-      classification: "Nothing yet...",
+      classification: "Inicie o gravador para identificar sons do ambiente",
       blobObject: null,
       isRecording: false,
       isPaused: false,
@@ -51,7 +46,7 @@ export default class Demo extends Component {
       interval = setInterval(() => {
         this.sendData();
       }, 1200);
-    }, 4160);
+    }, 2160);
   }
 
   sendData= () => {
@@ -74,8 +69,14 @@ export default class Demo extends Component {
       }
     )
     .then((response) => {
-      if (response.data in responses) {
-        this.setState({ classification: responses.response.data});
+      if (response.data === 'dog_bark') {
+        this.setState({ classification: 'Cachorro Latindo'});
+      }
+      if (response.data === 'siren') {
+        this.setState({ classification: 'Sirene'});
+      }
+      if (response.data === 'car_horn') {
+        this.setState({ classification: 'Buzina'});
       }
       console.log(response);
     })
