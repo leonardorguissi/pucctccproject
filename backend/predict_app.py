@@ -31,11 +31,11 @@ def create_spectrogram(filename, name):
 
 
 def preprocess_audio_segments(file):
-    original = AudioSegment.from_file('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', format="wav")
-    segment = AudioSegment.from_file(file, codec="opus")
-    original_three = original[-3000:]
-    one_second = segment[:1000]
-    final = original_three + one_second
+    #original = AudioSegment.from_file('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', format="wav")
+    final = AudioSegment.from_file(file, codec="opus")
+    #original_three = original[-3000:]
+    #one_second = segment[:1000]
+    #final = original_three + one_second
     final.export('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', format="wav")
 
 
@@ -50,13 +50,6 @@ def preprocess_audio_first(file):
 print(" * Loading Model...")
 path = Path('/kaggle/working/')
 np.random.seed(42)
-print(" * Data...")
-data = ImageDataBunch.from_csv(path,csv_labels='train.csv', folder="train", valid_pct=0.2, suffix='.jpg', ds_tfms=get_transforms(), size=224, num_workers=0).normalize(imagenet_stats)
-print(data.classes)
-print(" * CNN learner...")
-learn = cnn_learner(data, models.resnet34, metrics=accuracy).load('C:/kaggle/working/models/stage-3')
-learn.export()
-print(" * Exported...")
 model = load_learner('C:/kaggle/working/')
 print(" * Model loaded!")
 
@@ -64,7 +57,7 @@ print(" * Model loaded!")
 @app.route('/predict', methods=['POST'])
 @cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
 def predict():
-    response = "Nothing classified yet..."
+    response = "nothing"
     file = request.files['file']
     segment = request.form['segment']
     print(segment + '\n')
@@ -77,7 +70,9 @@ def predict():
     create_spectrogram('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', 'audio0')
     img = open_image('images/audio0.jpg')
     prediction = model.predict(img)
-    response = str(prediction[0]) + ' ' + str(max(prediction[2])) + ' '
+    if max(prediction[2]*100) > 65:
+        response = str(prediction[0])
+        print("maior que 65%")
     print("** RESPONSE: **")
     print(response)
     return response
