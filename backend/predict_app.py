@@ -42,16 +42,32 @@ def preprocess_audio_segments(file):
 def preprocess_audio_first(file):
     audio = AudioSegment.from_file(file, codec="opus")
     print(audio.duration_seconds)
-    end = 4000
-    final = audio[:end]
-    final.export('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', format="wav")
+    aux = 0;
+    i = 0;
+    for i in range(int(audio.duration_seconds)):
+        if i >= int(audio.duration_seconds):
+            break
+        final = audio[i*1000:(i+1)*1000]
+        final.export('C:/Users/Leonardo/Downloads/flask_apps/audios/audio' + str(i) + '.wav', format="wav")
+        create_spectrogram('C:/Users/Leonardo/Downloads/flask_apps/audios/audio' + str(i) + '.wav', 'audio' + str(i))
+        img = open_image('images/audio' + str(i) + '.jpg')
+        prediction = model.predict(img)
+        if str(prediction[0]) == 'car_horn':
+            print('instante: ' + str(i) + ' a ' + str(i))
+            aux = aux + 1
+            average = average + max(prediction[2]*100)
+    print('aux: ' + str(aux))
+    print('average: ' + str(average/aux))
+    #end = 4000
+    #final = audio[:end]
+    #final.export('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', format="wav")
 
 
 print(" * Loading Model...")
-path = Path('/kaggle/working/')
 np.random.seed(42)
-model = load_learner('C:/kaggle/working/')
+model = load_learner('/kaggle/working/')
 print(" * Model loaded!")
+defaults.device = torch.device('cuda')
 
 
 @app.route('/predict', methods=['POST'])
@@ -63,16 +79,16 @@ def predict():
     print(segment + '\n')
     if str(segment) == "first":
         print("** FIRST **")
-        preprocess_audio_first(file)
+        preprocess_audio_segments(file)
     else:
         print("** SEGMENT **")
         preprocess_audio_segments(file)
     create_spectrogram('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', 'audio0')
     img = open_image('images/audio0.jpg')
     prediction = model.predict(img)
-    if max(prediction[2]*100) > 65:
+    if max(prediction[2]*100) > 60:
         response = str(prediction[0])
-        print("maior que 65%")
+        print("maior que 60%")
     print("** RESPONSE: **")
     print(response)
     return response
