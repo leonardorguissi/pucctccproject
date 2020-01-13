@@ -21,7 +21,7 @@ def create_spectrogram(filename, name):
     ax.set_frame_on(False)
     S = librosa.feature.melspectrogram(y=clip, sr=sample_rate)
     librosa.display.specshow(librosa.power_to_db(S, ref=np.max))
-    filename = Path('/Users/Leonardo/Downloads/flask_apps/images/' + name + '.jpg')
+    filename = Path('<PATH>' + name + '.jpg')
     plt.savefig(filename, dpi=400, bbox_inches='tight',pad_inches=0)
     plt.close()    
     fig.clf()
@@ -31,12 +31,12 @@ def create_spectrogram(filename, name):
 
 
 def preprocess_audio_segments(file):
-    #original = AudioSegment.from_file('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', format="wav")
+    #original = AudioSegment.from_file('<PATH>', format="wav")
     final = AudioSegment.from_file(file, codec="opus")
     #original_three = original[-3000:]
     #one_second = segment[:1000]
     #final = original_three + one_second
-    final.export('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', format="wav")
+    final.export('<PATH>', format="wav")
 
 
 def preprocess_audio_first(file):
@@ -48,8 +48,8 @@ def preprocess_audio_first(file):
         if i >= int(audio.duration_seconds):
             break
         final = audio[i*1000:(i+1)*1000]
-        final.export('C:/Users/Leonardo/Downloads/flask_apps/audios/audio' + str(i) + '.wav', format="wav")
-        create_spectrogram('C:/Users/Leonardo/Downloads/flask_apps/audios/audio' + str(i) + '.wav', 'audio' + str(i))
+        final.export('<PATH>' + str(i) + '.wav', format="wav")
+        create_spectrogram('<PATH>' + str(i) + '.wav', 'audio' + str(i))
         img = open_image('images/audio' + str(i) + '.jpg')
         prediction = model.predict(img)
         if str(prediction[0]) == 'car_horn':
@@ -60,7 +60,7 @@ def preprocess_audio_first(file):
     print('average: ' + str(average/aux))
     #end = 4000
     #final = audio[:end]
-    #final.export('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', format="wav")
+    #final.export('<PATH>', format="wav")
 
 
 print(" * Loading Model...")
@@ -83,7 +83,7 @@ def predict():
     else:
         print("** SEGMENT **")
         preprocess_audio_segments(file)
-    create_spectrogram('C:/Users/Leonardo/Downloads/flask_apps/audios/audio0.wav', 'audio0')
+    create_spectrogram('<PATH>', 'audio0')
     img = open_image('images/audio0.jpg')
     prediction = model.predict(img)
     if max(prediction[2]*100) > 60:
